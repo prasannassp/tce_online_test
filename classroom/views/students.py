@@ -66,20 +66,19 @@ class QuizListView(ListView):
 class QuizResultsView(View):
     template_name = 'classroom/students/quiz_result.html'
 
-    def get(self, request, *args, **kwargs):
-        quiz = Quiz.objects.get(id=kwargs['pk'])
-        taken_quiz = TakenQuiz.objects.filter(
-            student=request.user.student, quiz=quiz)
+    def get(self, request, *args, **kwargs):        
+        quiz = Quiz.objects.get(id = kwargs['pk'])
+        taken_quiz = TakenQuiz.objects.filter(student = request.user.student, quiz = quiz)
         if not taken_quiz:
             """
             Don't show the result if the user didn't attempted the quiz
             """
             return render(request, '404.html')
-        questions = Question.objects.filter(quiz=quiz)
-
+        questions = Question.objects.filter(quiz =quiz)
+        
         # questions = self.form_class(initial=self.initial)
-        return render(request, self.template_name, {'questions': questions,
-                                                    'quiz': quiz, 'percentage': taken_quiz[0].percentage})
+        return render(request, self.template_name, {'questions':questions, 
+            'quiz':quiz, 'percentage': taken_quiz[0].percentage})
 
 
 @method_decorator([login_required, student_required], name='dispatch')
@@ -107,28 +106,31 @@ def take_quiz(request, pk):
     total_questions = quiz.questions.count()
     unanswered_questions = student.get_unanswered_questions(quiz)
     total_unanswered_questions = unanswered_questions.count()
-    progress = 100 - \
-        round(((total_unanswered_questions - 1) / total_questions) * 100)
-    question = random.choice(unanswered_questions)
-
+    progress = 100 - round(((total_unanswered_questions - 1) / total_questions) * 100)
+    #question = random.choice(unanswered_questions)
+    question = unanswered_questions.first()
+    print("//////////////////////////////////////random")
     if request.method == 'POST':
         form = TakeQuizForm(question=question, data=request.POST)
+        print("///////////////////////inside if block////////////////")
+        print("form")
+        print(form.errors)
         if form.is_valid():
+            print("//////////////////validation///////////////////")
             with transaction.atomic():
+                print("///////////////////atomic//////////////////")
                 student_answer = form.save(commit=False)
                 student_answer.student = student
                 student_answer.save()
+                print("/////////////////////////////////////////")
+                print(student_answer)
                 if student.get_unanswered_questions(quiz).exists():
                     return redirect('students:take_quiz', pk)
                 else:
-                    correct_answers = student.quiz_answers.filter(
-                        answer__question__quiz=quiz, answer__is_correct=True).count()
-                    percentage = round(
-                        (correct_answers / total_questions) * 100.0, 2)
-                    TakenQuiz.objects.create(
-                        student=student, quiz=quiz, score=correct_answers, percentage=percentage)
-                    student.score = TakenQuiz.objects.filter(
-                        student=student).aggregate(Sum('score'))['score__sum']
+                    correct_answers = student.quiz_answers.filter(answer__question__quiz=quiz, answer__is_correct=True).count()
+                    percentage = round((correct_answers / total_questions) * 100.0, 2)
+                    TakenQuiz.objects.create(student=student, quiz=quiz, score=correct_answers, percentage= percentage)
+                    student.score = TakenQuiz.objects.filter(student=student).aggregate(Sum('score'))['score__sum']
                     student.save()
                     '''if percentage < 50.0:
                         messages.warning(request, 'Better luck next time! Your score for the quiz %s was %s.' % (quiz.name, percentage))
