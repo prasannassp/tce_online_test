@@ -1,6 +1,12 @@
 from django.urls import include, path
 
-from .views import classroom, students, teachers
+
+from django.contrib import admin 
+from django.urls import path 
+from django.conf import settings 
+from django.conf.urls.static import static 
+from .views import *
+from .forms import *
 
 urlpatterns = [
     path('', classroom.home, name='home'),
@@ -23,4 +29,6 @@ urlpatterns = [
         path('quiz/<int:quiz_pk>/question/<int:question_pk>/', teachers.question_change, name='question_change'),
         path('quiz/<int:quiz_pk>/question/<int:question_pk>/delete/', teachers.QuestionDeleteView.as_view(), name='question_delete'),
     ], 'classroom'), namespace='teachers')),
+
 ]
+

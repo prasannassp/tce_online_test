@@ -7,6 +7,7 @@ from classroom.models import (Answer, Question, Student, StudentAnswer,
                               Subject, User)
 
 
+
 class TeacherSignUpForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
@@ -52,6 +53,7 @@ class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
         fields = ('text', )
+        
 
 
 class BaseAnswerInlineFormSet(forms.BaseInlineFormSet):
@@ -73,7 +75,7 @@ class TakeQuizForm(forms.ModelForm):
     answer = forms.ModelChoiceField(
         queryset=Answer.objects.none(),
         widget=forms.RadioSelect(),
-        required=True,
+        required=False,
         empty_label=None)
 
     class Meta:

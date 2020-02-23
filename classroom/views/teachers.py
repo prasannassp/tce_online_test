@@ -14,6 +14,10 @@ from ..decorators import teacher_required
 from ..forms import BaseAnswerInlineFormSet, QuestionForm, TeacherSignUpForm
 from ..models import Answer, Question, Quiz, User
 
+  
+  
+def success(request): 
+    return HttpResponse('successfully uploaded') 
 
 class TeacherSignUpView(CreateView):
     model = User
@@ -44,11 +48,10 @@ class QuizListView(ListView):
             .annotate(taken_count=Count('taken_quizzes', distinct=True))
         return queryset
 
-
 @method_decorator([login_required, teacher_required], name='dispatch')
 class QuizCreateView(CreateView):
     model = Quiz
-    fields = ('name', 'subject', )
+    fields = ('name', 'subject', 'quiz_no', 'time')
     template_name = 'classroom/teachers/quiz_add_form.html'
 
     def form_valid(self, form):
@@ -62,7 +65,7 @@ class QuizCreateView(CreateView):
 @method_decorator([login_required, teacher_required], name='dispatch')
 class QuizUpdateView(UpdateView):
     model = Quiz
-    fields = ('name', 'subject', )
+    fields = ('name', 'subject', 'quiz_no', 'time')
     context_object_name = 'quiz'
     template_name = 'classroom/teachers/quiz_change_form.html'
 

@@ -98,6 +98,10 @@ class TakenQuizListView(ListView):
 @student_required
 def take_quiz(request, pk):
     quiz = get_object_or_404(Quiz, pk=pk)
+    time = quiz.time
+    pos=time.index(":")
+    timem = int(time[:int(pos)])
+    times = int(time[int(pos)+1:int(pos)+3])
     student = request.user.student
 
     if student.quizzes.filter(pk=pk).exists():
@@ -145,6 +149,8 @@ def take_quiz(request, pk):
         'question': question,
         'form': form,
         'progress': progress,
+        'timem':timem,
+        'times':times,
         'answered_questions': total_questions - total_unanswered_questions,
         'total_questions': total_questions
     })
